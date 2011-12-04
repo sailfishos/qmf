@@ -1,0 +1,35 @@
+Description: fix tests installation path
+Author: Fathi Boudra <fathi.boudra@nokia.com>
+--- a/benchmarks/tst_messageserver/tst_messageserver.pro
++++ b/benchmarks/tst_messageserver/tst_messageserver.pro
+@@ -3,7 +3,7 @@ CONFIG += qtestlib unittest
+ CONFIG += qmfmessageserver qmfclient
+ 
+ TARGET = tst_messageserver 
+-target.path += $$QMF_INSTALL_ROOT/tests
++target.path += $$QMF_INSTALL_ROOT/lib/qmf/tests
+ 
+ BASE=../../
+ include($$BASE/common.pri)
+--- a/tests/tests.pri
++++ b/tests/tests.pri
+@@ -2,7 +2,7 @@ macx {
+     QMAKE_MACOSX_DEPLOYMENT_TARGET=10.5
+ }
+ 
+-target.path+=$$QMF_INSTALL_ROOT/tests
++target.path+=$$QMF_INSTALL_ROOT/lib/qmf/tests
+ 
+ QMFPATH=../../src/libraries/qmfclient
+ DEPENDPATH += .
+--- a/tests/tst_python_email/tst_python_email.pro
++++ b/tests/tst_python_email/tst_python_email.pro
+@@ -5,7 +5,7 @@ TARGET = tst_python_email
+ !symbian {
+     DEFINES += SRCDIR=\\\"$$_PRO_FILE_PWD_\\\"
+ 
+-    testdata.path = $$QMF_INSTALL_ROOT/tests/testdata
++    testdata.path = $$QMF_INSTALL_ROOT/lib/qmf/tests
+     testdata.files = testdata/
+ 
+     INSTALLS += testdata

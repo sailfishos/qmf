@@ -1,0 +1,96 @@
+* Mon Apr 04 2011 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2011w13
+- Update to 1.0.7~2011w13 (BMC#15206)
+
+* Fri Mar 25 2011 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2011w11
+- Update to 1.0.7~2011w11 and switch to upstream QMF
+- Update URL
+- Remove BuildRequires: accounts-qt, libsignon-qt and signon-plugins
+- Update files list
+
+* Tue Feb 15 2011 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2011w06
+- Update to 1.0.7~2011w06 (BMC#13743)
+
+* Fri Feb 11 2011 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2011w04
+- Update to 1.0.7~2011w04
+
+* Tue Feb 08 2011 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2011w03
+- Update to 1.0.7~2011w03
+
+* Mon Jan 24 2011 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2011w02
+- Update to 1.0.7~2011w02 (BMC#12861)
+
+* Fri Dec 10 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2010w48
+- Update to 1.0.7~2010w48
+- Fix unable to create an account using qtmail (BMC#10672)
+
+* Fri Nov 26 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2010w46
+- Update to 1.0.7~2010w46 (BMC#10519)
+- Revert CONFIG+=syslog
+- Use ExtraSources to install files
+
+* Wed Nov 03 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2010w43
+- Update to 1.0.7~2010w43
+- Remove CONFIG+=syslog (not needed anymore)
+
+* Fri Oct 01 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2010w36
+- Update to 1.0.7~2010w36
+- Update patches to apply against the new release
+- Add QMake QMF_INSTALL_ROOT option
+- Adjust packages name (upstream changed QMF libraries name):
+  libmessageserver1 -> libqmfmessageserver1
+  libqtopiamail1 -> libqmfclient1
+- Remove Provides/Obsoletes messagingframework, no longer needed since
+  the upstream libraries naming changes
+- Update %files according to the new naming scheme
+
+* Wed Sep 29 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0~2010w35
+- Add desktop file to autostart messageserver (BMC#5881)
+
+* Tue Sep 28 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0~2010w35
+- Set QMF_PLUGINS environment variable (BMC#7518)
+
+* Wed Sep 15 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0~2010w35
+- Update to 2010w35
+- Add 05_accounts_creation.patch (BMC#5953)
+- Add libsignon-qt and signon-plugins BuildRequires
+- Use qmake builder
+- Pass CONFIG+=syslog to get debug messages in the syslog
+
+* Tue Aug 24 2010 Bernd Wachter <ext-bernd.wachter@nokia.com> - 1.0~2010w31
+- Update to latest upstream version
+- Remove obsolete 03_add_qch_documentation.patch
+- Update 02_fix_installation_paths.patch
+- Package html documentation
+
+* Tue Aug 24 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0~2010w23
+- Add libqtsql4-sqlite missing Requires on libmessageserver1 (BMC#5674)
+
+* Wed Jul 21 2010 Fathi Boudra <fathi.boudra@nokia.com> - 1.0~2010w23
+- Update tarball to commit ff2ff03 by sergk on Thu Jun 17
+- Rewrite from scratch for MeeGo
+- Rename messagingframework source package to qmf
+- Split the binaries packages
+- Add patches:
+  02_fix_installation_paths.patch
+  03_add_qch_documentation.patch
+  04_no_rpath_tests_benchmarks.patch
+- Drop patches:
+  install-plugins-under-usr-lib-qt-plugins.patch
+  install-tests-under-qtdir.patch
+
+* Tue Jul 06 2010 Anas Nashif <anas.nashif@intel.com> - 2010W23
+- Fixed URL, point to meego.gitorious.org
+- Fixed pkgconfig build requires
+
+* Tue Jun 22 2010 Bernd Wachter <ext-bernd.wachter@nokia.com> - 2010W23
+- Update source
+- Merge package with old nokia version
+- Enable accounts subsystem
+
+* Sun Mar 13 2010 Kaitlin Rupert <kaitlin.rupert@linux.intel.com> - 1.0
+- Update source
+- Install plugins to QT plugin install location
+- Include libraries in source package, sym links to libraries in devel package
+
+* Thu Mar 4 2010 Kaitlin Rupert <kaitlin.rupert@linux.intel.com> - 1.0
+- Initial import
