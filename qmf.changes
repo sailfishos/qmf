@@ -1,3 +1,6 @@
+* Tue Mar 20 2012 Carsten Munk <carsten.munk@gmail.com> - 1.0.7~2011w13
+- Define malloc hook correct as to work with glibc > 2.14
+
 * Mon Apr 04 2011 Fathi Boudra <fathi.boudra@nokia.com> - 1.0.7~2011w13
 - Update to 1.0.7~2011w13 (BMC#15206)
 

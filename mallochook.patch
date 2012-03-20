@@ -1,0 +1,25 @@
+diff -ru qmf-1.0.7~2011w13/benchmarks/tst_messageserver/testmalloc.cpp qmf-1.0.7~2011w13-mallochook/benchmarks/tst_messageserver/testmalloc.cpp
+--- qmf-1.0.7~2011w13/benchmarks/tst_messageserver/testmalloc.cpp	2011-04-04 08:40:23.000000000 +0200
++++ qmf-1.0.7~2011w13-mallochook/benchmarks/tst_messageserver/testmalloc.cpp	2012-03-20 09:39:27.580152055 +0100
+@@ -62,6 +62,11 @@
+ /* Additional amount of memory allocated by malloc for each chunk */
+ #define CHUNK_OVERHEAD (2*sizeof(size_t))
+ 
++#ifndef __MALLOC_HOOK_VOLATILE
++# define __MALLOC_HOOK_VOLATILE
++#endif
++
++
+ struct TestMallocPrivate
+ {
+     static void init();
+@@ -163,7 +168,7 @@
+     D->now_overhead = 0;
+ }
+ 
+-void (*__malloc_initialize_hook) (void) = TestMallocPrivate::init;
++void (*__MALLOC_HOOK_VOLATILE __malloc_initialize_hook) (void) = TestMallocPrivate::init;
+ 
+ void TestMallocPrivate::init()
+ {
+Only in qmf-1.0.7~2011w13-mallochook/benchmarks/tst_messageserver: testmalloc.cpp~

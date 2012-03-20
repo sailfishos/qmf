@@ -13,6 +13,8 @@ Patches:
     - fix_tests_installation.patch
     - no_rpath_tests_benchmarks.patch
     - add_headers.patch
+    - mallochook.patch
+
 Description: |
     The Qt Messaging Framework, QMF, consists of a C++ library and daemon server
     process that can be used to build email clients, and more generally software
