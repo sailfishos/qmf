@@ -1,20 +1,13 @@
-Description: fix doc installation paths and install qch doc
-Author: Fathi Boudra <fathi.boudra@nokia.com>
+Description: Deploy html files
+Author: Valerio Valerio <vdv100@gmail.com>
+diff --git a/doc/src/doc.pri b/doc/src/doc.pri
+index 784c881..63cdb2f 100644
 --- a/doc/src/doc.pri
 +++ b/doc/src/doc.pri
-@@ -33,7 +33,7 @@ qch_docs.depends += html_docs
- qch_docs.files = $$QCH_FILE
- 
- unix:!macx {
--    qch_docs.path = $$QMF_INSTALL_ROOT/share/qmf/doc
-+    qch_docs.path = $$QMF_INSTALL_ROOT/share/doc/qmf/qch
-     qch_docs.CONFIG += no_check_exist
- }
- 
-@@ -46,3 +46,9 @@ OTHER_FILES = $$HELP_DEP_FILES \
-               $$_PRO_FILE_PWD_/doc/src/api/groups.qdoc \
-               $$_PRO_FILE_PWD_/doc/src/examples/messageviewer.qdoc \
-               $$_PRO_FILE_PWD_/doc/src/examples/messagenavigator.qdoc
+@@ -44,3 +44,9 @@ OTHER_FILES = $$HELP_DEP_FILES \
+               $$_PRO_FILE_PWD_/doc/src/api/api-pages.qdoc \
+               $$_PRO_FILE_PWD_/doc/src/api/classhierarchy.qdoc \
+               $$_PRO_FILE_PWD_/doc/src/api/groups.qdoc
 +
 +# TEMP: deploying existing html files
 +html.files = $$_PRO_FILE_PWD_/doc/html/*

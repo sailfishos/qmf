@@ -1,9 +1,11 @@
 Description: fix tests installation path
-Author: Fathi Boudra <fathi.boudra@nokia.com>
+Author: Valerio Valerio <vdv100@gmail.com>
+diff --git a/benchmarks/tst_messageserver/tst_messageserver.pro b/benchmarks/tst_messageserver/tst_messageserver.pro
+index 8fcb500..fe6ffa1 100644
 --- a/benchmarks/tst_messageserver/tst_messageserver.pro
 +++ b/benchmarks/tst_messageserver/tst_messageserver.pro
-@@ -3,7 +3,7 @@ CONFIG += qtestlib unittest
- CONFIG += qmfmessageserver qmfclient
+@@ -4,7 +4,7 @@ CONFIG += qmfmessageserver qmfclient
+ QT += widgets
  
  TARGET = tst_messageserver 
 -target.path += $$QMF_INSTALL_ROOT/tests
@@ -11,9 +13,11 @@ Author: Fathi Boudra <fathi.boudra@nokia.com>
  
  BASE=../../
  include($$BASE/common.pri)
+diff --git a/tests/tests.pri b/tests/tests.pri
+index 0c75eae..c7c2815 100644
 --- a/tests/tests.pri
 +++ b/tests/tests.pri
-@@ -2,7 +2,7 @@ macx {
+@@ -4,7 +4,7 @@ macx {
      QMAKE_MACOSX_DEPLOYMENT_TARGET=10.5
  }
  
@@ -22,6 +26,20 @@ Author: Fathi Boudra <fathi.boudra@nokia.com>
  
  QMFPATH=../../src/libraries/qmfclient
  DEPENDPATH += .
+diff --git a/tests/tests.pro b/tests/tests.pro
+index 24e9e4b..4749b31 100644
+--- a/tests/tests.pro
++++ b/tests/tests.pro
+@@ -32,6 +32,6 @@ CONFIG += unittest
+ 
+ # Install test file description
+ test_description.files = tests.xml
+-test_description.path  = $$QMF_INSTALL_ROOT/tests
++test_description.path  = $$QMF_INSTALL_ROOT/lib/qmf/tests
+ 
+ INSTALLS += test_description
+diff --git a/tests/tst_python_email/tst_python_email.pro b/tests/tst_python_email/tst_python_email.pro
+index bc50ec7..a50ff69 100644
 --- a/tests/tst_python_email/tst_python_email.pro
 +++ b/tests/tst_python_email/tst_python_email.pro
 @@ -5,7 +5,7 @@ TARGET = tst_python_email
@@ -29,7 +47,7 @@ Author: Fathi Boudra <fathi.boudra@nokia.com>
      DEFINES += SRCDIR=\\\"$$_PRO_FILE_PWD_\\\"
  
 -    testdata.path = $$QMF_INSTALL_ROOT/tests/testdata
-+    testdata.path = $$QMF_INSTALL_ROOT/lib/qmf/tests
-     testdata.files = testdata/
++    testdata.path = $$QMF_INSTALL_ROOT/lib/qmf/tests/testdata
+     testdata.files = testdata/*
  
      INSTALLS += testdata

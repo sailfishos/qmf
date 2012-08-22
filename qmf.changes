@@ -1,3 +1,6 @@
+* Wed Aug 20 2012 Valerio Valerio <vdv100@gmail.com> - 1.0.8~2012w23
+- Update to 1.0.8~2012w23
+
 * Tue Mar 20 2012 Carsten Munk <carsten.munk@gmail.com> - 1.0.7~2011w13
 - Define malloc hook correct as to work with glibc > 2.14
 

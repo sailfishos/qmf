@@ -1,6 +1,6 @@
 Name: qmf
 Summary: Qt Messaging Framework (QMF)
-Version: 1.0.7~2011w13
+Version: 1.0.8~2012w23
 Release: 1
 Group: System/Libraries
 License: LGPLv2.1 with exception or GPLv3
@@ -9,11 +9,9 @@ Sources:
     - "%{name}-%{version}.tar.bz2"
 Patches:
     - fix_docs_installation.patch
-    - fix_plugins_installation.patch
     - fix_tests_installation.patch
     - no_rpath_tests_benchmarks.patch
     - add_headers.patch
-    - mallochook.patch
 
 Description: |
     The Qt Messaging Framework, QMF, consists of a C++ library and daemon server
@@ -22,12 +20,15 @@ Description: |
 PkgBR:
     - qt-devel-tools
 PkgConfigBR:
+    - zlib
+    - icu-i18n
     - QtGui
 Configure: none
 Builder: qmake
 QMakeOptions:
     - "QMF_INSTALL_ROOT=%{_prefix}"
-    - CONFIG+=syslog
+    - DEFINES+=QMF_ENABLE_LOGGING
+    - CONFIG+=syslog  
 ExtraSources:
     - qmf.sh;%{_sysconfdir}/profile.d
     - messageserver.desktop;%{_sysconfdir}/xdg/autostart
