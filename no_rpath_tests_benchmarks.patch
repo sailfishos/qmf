@@ -1,5 +1,7 @@
 Description: Remove rpath from tests and benchmarks
 Author: Fathi Boudra <fathi.boudra@nokia.com>
+--- a/benchmarks/tst_messageserver/tst_messageserver.pro
++++ b/benchmarks/tst_messageserver/tst_messageserver.pro
 @@ -29,11 +29,6 @@ INCLUDEPATH += . 3rdparty $$BASE/src/lib
  LIBS += -L$$BASE/src/libraries/qmfmessageserver/build \
          -L$$BASE/src/libraries/qmfclient/build
@@ -22,5 +24,4 @@ Author: Fathi Boudra <fathi.boudra@nokia.com>
  
  symbian {
      TARGET.CAPABILITY = ReadUserData WriteUserData ReadDeviceData WriteDeviceData
---- a/benchmarks/tst_messageserver/tst_messageserver.pro
-+++ b/benchmarks/tst_messageserver/tst_messageserver.pro
+
