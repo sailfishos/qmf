@@ -11,6 +11,7 @@ Patches:
     - fix_tests_installation.patch
     - fix_docs_installation.patch
     - no_rpath_tests_benchmarks.patch
+    - accounts-qt-integration.patch
 
 Description: |
     The Qt Messaging Framework, QMF, consists of a C++ library and daemon server
@@ -22,11 +23,14 @@ PkgConfigBR:
     - zlib
     - icu-i18n
     - QtGui
+    - accounts-qt
+    - libsignon-qt
 Configure: none
 Builder: qmake
 QMakeOptions:
     - "QMF_INSTALL_ROOT=%{_prefix}"
     - DEFINES+=QMF_ENABLE_LOGGING
+    - DEFINES+=USE_ACCOUNTS_QT
     - CONFIG+=syslog
 ExtraSources:
      - qmf.sh;%{_sysconfdir}/profile.d

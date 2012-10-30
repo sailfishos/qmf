@@ -1,3 +1,6 @@
+* Tue Oct 30 2012 Valerio Valerio <vdv100@gmail.com> - 1.0.8~2012w23
+- Fixes MER#628 : Integrate accounts-qt support in QMF
+
 * Mon Oct 15 2012 Valerio Valerio <vdv100@gmail.com> - 1.0.8~2012w23
 - Fixes MER#594 : 4 test cases in qmf-tests tests.xml do not exist any more
 

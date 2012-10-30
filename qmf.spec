@@ -18,9 +18,12 @@ Source100:  qmf.yaml
 Patch0:     fix_tests_installation.patch
 Patch1:     fix_docs_installation.patch
 Patch2:     no_rpath_tests_benchmarks.patch
+Patch3:     accounts-qt-integration.patch
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(QtGui)
+BuildRequires:  pkgconfig(accounts-qt)
+BuildRequires:  pkgconfig(libsignon-qt)
 BuildRequires:  qt-devel-tools
 BuildRequires:  fdupes
 
@@ -175,6 +178,8 @@ HTML format.
 %patch1 -p1
 # no_rpath_tests_benchmarks.patch
 %patch2 -p1
+# accounts-qt-integration.patch
+%patch3 -p1
 # >> setup
 # << setup
 
@@ -185,6 +190,7 @@ HTML format.
 %qmake  \
     QMF_INSTALL_ROOT=%{_prefix} \
     DEFINES+=QMF_ENABLE_LOGGING \
+    DEFINES+=USE_ACCOUNTS_QT \
     CONFIG+=syslog
 
 make %{?jobs:-j%jobs}
@@ -282,6 +288,7 @@ cp -a %{SOURCE1} %{buildroot}%{_sysconfdir}/profile.d
 # >> files libqmfclient1
 %{_libdir}/libqmfclient.so.*
 %{_libdir}/qmf/plugins/contentmanagers/libqmfstoragemanager.so
+/usr/share/accounts/*
 # << files libqmfclient1
 
 %files examples
