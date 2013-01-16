@@ -1,5 +1,16 @@
-* Tue Oct 30 2012 Valerio Valerio <vdv100@gmail.com> - 1.0.8~2012w23
-- Fixes MER#628 : Integrate accounts-qt support in QMF
+* Wed Jan 16 2013 Valerio Valerio <valerio.valerio@jollamobile.com> - 1.0.9~2013w03
+- Update to 1.0.9~2013w03
+- Fix lastSync time for accounts that have never been synced(accounts-qt)
+- Set Inbox as standard folder for IMAP4 accounts
+- S/Nokia/QtProject/ in settings files
+- Check for zlib via pkgconfig instead of relying on it always being on unix
+- Check for libicu's pkgconfig file
+- Search QMF_INSTALL_ROOT for plugins
+
+* Tue Oct 30 2012 Valerio Valerio <valerio.valerio@jollamobile.com> - 1.0.8~2012w23
+- Improve Accounts-qt integration
+- Make sure accounts related signals are not emitted twice
+- Add unit tests
 
 * Mon Oct 15 2012 Valerio Valerio <vdv100@gmail.com> - 1.0.8~2012w23
 - Fixes MER#594 : 4 test cases in qmf-tests tests.xml do not exist any more

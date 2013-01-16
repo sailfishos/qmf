@@ -1,11 +1,11 @@
-From d73d2f36379b81bde2c6728912219883cc92f988 Mon Sep 17 00:00:00 2001
+From 288d4f703f0e807c87c1944bc3b52ae9a0b1cdd9 Mon Sep 17 00:00:00 2001
 From: Valerio Valerio <valerio.valerio@jollamobile.com>
-Date: Thu, 29 Nov 2012 12:49:50 +0200
+Date: Tue, 15 Jan 2013 11:24:11 +0200
 Subject: [PATCH] Accounts-qt integration.
 
 ---
  src/libraries/qmfclient/qmailstore.cpp             |    5 +-
- src/libraries/qmfclient/qmailstore_p.cpp           | 1216 +++++++++++++++++++-
+ src/libraries/qmfclient/qmailstore_p.cpp           | 1222 +++++++++++++++++++-
  src/libraries/qmfclient/qmailstore_p.h             |   47 +-
  src/libraries/qmfclient/qmfclient.pro              |   26 +
  src/libraries/qmfclient/share/GenericEmail.service |   65 ++
@@ -34,7 +34,7 @@ Subject: [PATCH] Accounts-qt integration.
  src/plugins/messageservices/smtp/smtpclient.h      |   36 +
  src/plugins/messageservices/smtp/smtpservice.cpp   |    6 +
  tests/tst_qmailstore/tst_qmailstore.cpp            |   11 +
- 30 files changed, 2636 insertions(+), 37 deletions(-)
+ 30 files changed, 2643 insertions(+), 36 deletions(-)
  create mode 100644 src/libraries/qmfclient/share/GenericEmail.service
  create mode 100644 src/libraries/qmfclient/share/GenericProvider.provider
  create mode 100644 src/libraries/qmfclient/ssoaccountmanager.cpp
@@ -71,7 +71,7 @@ index 1e53d51..cdc4cf4 100644
      return true;
  }
 diff --git a/src/libraries/qmfclient/qmailstore_p.cpp b/src/libraries/qmfclient/qmailstore_p.cpp
-index 74d57be..eac278c 100644
+index 74d57be..66af91d 100644
 --- a/src/libraries/qmfclient/qmailstore_p.cpp
 +++ b/src/libraries/qmfclient/qmailstore_p.cpp
 @@ -54,6 +54,10 @@
@@ -621,7 +621,7 @@ index 74d57be..eac278c 100644
  
  } // namespace
  
-@@ -2480,7 +2946,37 @@ QMailStorePrivate::QMailStorePrivate(QMailStore* parent)
+@@ -2480,7 +2946,36 @@ QMailStorePrivate::QMailStorePrivate(QMailStore* parent)
          contentMutex = new ProcessMutex(databaseIdentifier(), 3);
      }
      connect(&databaseUnloadTimer, SIGNAL(timeout()), this, SLOT(unloadDatabase()));
@@ -637,7 +637,6 @@ index 74d57be..eac278c 100644
 +QSharedPointer<Accounts::Account> QMailStorePrivate::getEmailAccount(const Accounts::AccountId id)
 +{
 +    //get account from the manager
-+    qMailLog(Messaging) << "Looking for account by id:" << id;
 +    QSharedPointer<Accounts::Account> ssoAccount(manager->account(id));
 +
 +    if (!ssoAccount) {
@@ -659,7 +658,7 @@ index 74d57be..eac278c 100644
  
  QMailStorePrivate::~QMailStorePrivate()
  {
-@@ -2685,6 +3181,23 @@ void QMailStorePrivate::clearContent()
+@@ -2685,6 +3180,23 @@ void QMailStorePrivate::clearContent()
  
      Transaction t(this);
  
@@ -683,7 +682,7 @@ index 74d57be..eac278c 100644
      // Drop all data
      foreach (const QString &table, database()->tables()) {
          if (table != "versioninfo" && table != "mailstatusflags") {
-@@ -3006,10 +3519,18 @@ bool QMailStorePrivate::idValueExists(quint64 id, const QString& table)
+@@ -3006,10 +3518,18 @@ bool QMailStorePrivate::idValueExists(quint64 id, const QString& table)
      return (query.first());
  }
  
@@ -702,7 +701,7 @@ index 74d57be..eac278c 100644
  
  bool QMailStorePrivate::idExists(const QMailFolderId& id, const QString& table)
  {
-@@ -3038,6 +3559,40 @@ bool QMailStorePrivate::messageExists(const QString &serveruid, const QMailAccou
+@@ -3038,6 +3558,44 @@ bool QMailStorePrivate::messageExists(const QString &serveruid, const QMailAccou
      return query.first();
  }
  
@@ -735,15 +734,19 @@ index 74d57be..eac278c 100644
 +                          QMailAddress(ssoAccount->valueAsString("fullName"),ssoAccount->valueAsString("emailaddress")):
 +                          QMailAddress(ssoAccount->valueAsString("emailaddress")));
 +
-+    result.setLastSynchronized(QMailTimeStamp(QDateTime::fromTime_t(static_cast<uint>(ssoAccount->valueAsUInt64("lastSynchronized")))));
-+
++    if ((static_cast<uint>(ssoAccount->valueAsUInt64("lastSynchronized"))) == 0) {
++            result.setLastSynchronized(QMailTimeStamp());
++    }
++    else {
++        result.setLastSynchronized(QMailTimeStamp(QDateTime::fromTime_t(static_cast<uint>(ssoAccount->valueAsUInt64("lastSynchronized")))));
++    }
 +    return result;
 +}
 +#else
  QMailAccount QMailStorePrivate::extractAccount(const QSqlRecord& r)
  {
      const AccountRecord record(r);
-@@ -3053,7 +3608,7 @@ QMailAccount QMailStorePrivate::extractAccount(const QSqlRecord& r)
+@@ -3053,7 +3611,7 @@ QMailAccount QMailStorePrivate::extractAccount(const QSqlRecord& r)
  
      return result;
  }
@@ -752,7 +755,7 @@ index 74d57be..eac278c 100644
  
  QMailThread QMailStorePrivate::extractThread(const QSqlRecord& r)
  {
-@@ -3296,8 +3851,12 @@ QString QMailStorePrivate::buildOrderClause(const Key& key) const
+@@ -3296,8 +3854,12 @@ QString QMailStorePrivate::buildOrderClause(const Key& key) const
          const QMailThreadSortKey &sortKey(key.key<QMailThreadSortKey>());
          return ::buildOrderClause(sortKey.arguments(), key.alias());
      } else if (key.isType<QMailAccountSortKey>()) {
@@ -765,7 +768,7 @@ index 74d57be..eac278c 100644
      } 
  
      return QString();
-@@ -5364,22 +5923,247 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::updateCustomFields(quint64 i
+@@ -5364,21 +5926,246 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::updateCustomFields(quint64 i
      return Success;
  }
  
@@ -798,7 +801,6 @@ index 74d57be..eac278c 100644
      return Success;
  }
  
--QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAddAccount(QMailAccount *account, QMailAccountConfiguration* config, 
 +QMailStorePrivate::AttemptResult QMailStorePrivate::updateAccountCustomFields(QSharedPointer<Accounts::Account>& ssoAccount, const QMap<QString, QString> &fields)
 +{
 +    ssoAccount->beginGroup("customFields");
@@ -869,7 +871,6 @@ index 74d57be..eac278c 100644
 +
 +QMailStorePrivate::AttemptResult QMailStorePrivate::accountCustomFields(QSharedPointer<Accounts::Account>& ssoAccount, QMap<QString, QString>* fields)
 +{
-+    qMailLog(Messaging) << "Load custom fields";
 +    ssoAccount->beginGroup("customFields");
 +    foreach (const QString& key, ssoAccount->allKeys()) {
 +        qMailLog(Messaging) << "Custom Field:" << key << "=" << ssoAccount->valueAsString(key);
@@ -933,7 +934,8 @@ index 74d57be..eac278c 100644
 +    ssoAccount->setValue("signature", account->signature());
 +    ssoAccount->setValue("emailaddress", account->fromAddress().address());
 +    ssoAccount->setValue("fullName", account->fromAddress().name());
-+    ssoAccount->setValue("lastSynchronized", static_cast<quint64>(account->lastSynchronized().toLocalTime().toTime_t()));
++    //Account was never synced
++    ssoAccount->setValue("lastSynchronized", quint64(0));
 +
 +    if (!ssoAccount->syncAndBlock())
 +        return DatabaseFailure;
@@ -1019,11 +1021,10 @@ index 74d57be..eac278c 100644
 +    return Success;
 +}
 +#else
-+QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAddAccount(QMailAccount *account, QMailAccountConfiguration* config, 
+ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAddAccount(QMailAccount *account, QMailAccountConfiguration* config, 
                                                                        QMailAccountIdList *addedAccountIds, 
                                                                        Transaction &t, bool commitOnSuccess)
- {
-@@ -5479,6 +6263,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAddAccount(QMailAccou
+@@ -5479,6 +6266,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAddAccount(QMailAccou
      addedAccountIds->append(insertId);
      return Success;
  }
@@ -1031,7 +1032,7 @@ index 74d57be..eac278c 100644
  
  QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAddFolder(QMailFolder *folder, 
                                                                       QMailFolderIdList *addedFolderIds, QMailAccountIdList *modifiedAccountIds,
-@@ -6052,7 +6837,45 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6052,7 +6840,50 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
      if (!id.isValid())
          return Failure;
  
@@ -1070,14 +1071,19 @@ index 74d57be..eac278c 100644
 +        ssoAccount->setValue("signature", account->signature());
 +        ssoAccount->setValue("emailaddress", account->fromAddress().address());
 +        ssoAccount->setValue("fullName", account->fromAddress().name());
-+        ssoAccount->setValue("lastSynchronized", static_cast<quint64>(account->lastSynchronized().toLocalTime().toTime_t()));
++        if (account->lastSynchronized().isValid()) {
++            ssoAccount->setValue("lastSynchronized", static_cast<quint64>(account->lastSynchronized().toLocalTime().toTime_t()));
++        }
++        else {
++            ssoAccount->setValue("lastSynchronized", quint64(0));
++        }
 +        bool isDefault = account->status() & QMailAccount::PreferredSender;
 +        ssoAccount->setValue("email/default", isDefault);
 +#else
          QString properties("type=?, name=?, emailaddress=?, status=?, signature=?, lastsynchronized=?");
          QVariantList propertyValues;
          propertyValues << static_cast<int>(account->messageType()) 
-@@ -6069,7 +6892,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6069,7 +6900,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
              if (query.lastError().type() != QSqlError::NoError)
                  return DatabaseFailure;
          }
@@ -1086,7 +1092,7 @@ index 74d57be..eac278c 100644
          // Update any standard folders configured
          const QMap<QMailFolder::StandardFolder, QMailFolderId> &folders(account->standardFolders());
          QMap<QMailFolder::StandardFolder, QMailFolderId> existingFolders;
-@@ -6144,13 +6967,20 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6144,13 +6975,20 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
          }
  
          if (account->customFieldsModified()) {
@@ -1107,7 +1113,7 @@ index 74d57be..eac278c 100644
          // Find the complete set of configuration fields
          QMap<QPair<QString, QString>, QString> fields;
  
-@@ -6168,6 +6998,17 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6168,6 +7006,17 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
          QMap<QPair<QString, QString>, QString> existing;
  
          {
@@ -1125,7 +1131,7 @@ index 74d57be..eac278c 100644
              QSqlQuery query(simpleQuery("SELECT service,name,value FROM mailaccountconfig WHERE id=?",
                                          QVariantList() << id.toULongLong(),
                                          "updateAccount mailaccountconfig select query"));
-@@ -6176,6 +7017,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6176,6 +7025,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
  
              while (query.next())
                  existing.insert(qMakePair(query.value(0).toString(), query.value(1).toString()), query.value(2).toString());
@@ -1133,7 +1139,7 @@ index 74d57be..eac278c 100644
          }
  
          QMap<QString, QVariantList> obsoleteFields;
-@@ -6212,13 +7054,20 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6212,13 +7062,20 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
              for ( ; it != end; ++it) {
                  const QString &service = it.key();
                  const QVariantList &fields = it.value();
@@ -1155,7 +1161,7 @@ index 74d57be..eac278c 100644
              }
          }
  
-@@ -6229,13 +7078,23 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6229,13 +7086,23 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
                  const QString &service = it.key();
                  const QVariantList &fields = it.value();
                  const QVariantList &values = vit.value();
@@ -1180,7 +1186,7 @@ index 74d57be..eac278c 100644
              }
          }
  
-@@ -6246,13 +7105,23 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6246,13 +7113,23 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
                  const QString &service = it.key();
                  const QVariantList &fields = it.value();
                  const QVariantList &values = vit.value();
@@ -1205,7 +1211,7 @@ index 74d57be..eac278c 100644
              }
          }
      }
-@@ -6261,7 +7130,12 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
+@@ -6261,7 +7138,12 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptUpdateAccount(QMailAc
          qWarning() << "Could not commit account update to database";
          return DatabaseFailure;
      }
@@ -1219,7 +1225,7 @@ index 74d57be..eac278c 100644
      if (account) {
          // Update the account cache
          if (accountCache.contains(id))
-@@ -7242,6 +8116,10 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptEnsureDurability(Tran
+@@ -7242,6 +8124,10 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptEnsureDurability(Tran
  QMailStorePrivate::AttemptResult QMailStorePrivate::attemptCountAccounts(const QMailAccountKey &key, int *result, 
                                                                           ReadLock &)
  {
@@ -1230,7 +1236,7 @@ index 74d57be..eac278c 100644
      QSqlQuery query(simpleQuery("SELECT COUNT(*) FROM mailaccounts",
                                  Key(key),
                                  "countAccounts mailaccounts query"));
-@@ -7250,7 +8128,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptCountAccounts(const Q
+@@ -7250,7 +8136,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptCountAccounts(const Q
  
      if (query.first())
          *result = extractValue<int>(query.value(0));
@@ -1239,7 +1245,7 @@ index 74d57be..eac278c 100644
      return Success;
  }
  
-@@ -7321,6 +8199,14 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptQueryAccounts(const Q
+@@ -7321,6 +8207,14 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptQueryAccounts(const Q
                                                                           QMailAccountIdList *ids, 
                                                                           ReadLock &)
  {
@@ -1254,7 +1260,7 @@ index 74d57be..eac278c 100644
      QSqlQuery query(simpleQuery("SELECT id FROM mailaccounts",
                                  QVariantList(),
                                  QList<Key>() << Key(key) << Key(sortKey),
-@@ -7331,7 +8217,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptQueryAccounts(const Q
+@@ -7331,7 +8225,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptQueryAccounts(const Q
  
      while (query.next())
          ids->append(QMailAccountId(extractValue<quint64>(query.value(0))));
@@ -1263,7 +1269,7 @@ index 74d57be..eac278c 100644
      return Success;
  }
  
-@@ -7395,6 +8281,71 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptQueryMessages(const Q
+@@ -7395,6 +8289,71 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptQueryMessages(const Q
      return Success;
  }
  
@@ -1335,7 +1341,7 @@ index 74d57be..eac278c 100644
  QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAccount(const QMailAccountId &id, 
                                                                     QMailAccount *result, 
                                                                     ReadLock &)
-@@ -7461,7 +8412,50 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAccount(const QMailAc
+@@ -7461,7 +8420,50 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAccount(const QMailAc
  
      return Failure;
  }
@@ -1376,17 +1382,17 @@ index 74d57be..eac278c 100644
 +            ssoAccount->endGroup();
 +        }
 +    }
- 
++
 +    result->setId(id);
 +    result->setModified(false);
-+
+ 
 +    return Success;
 +}
 +#else
  QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAccountConfiguration(const QMailAccountId &id, 
                                                                                  QMailAccountConfiguration *result, 
                                                                                  ReadLock &)
-@@ -7511,6 +8505,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAccountConfiguration(
+@@ -7511,6 +8513,7 @@ QMailStorePrivate::AttemptResult QMailStorePrivate::attemptAccountConfiguration(
  
      return Success;
  }
@@ -1394,7 +1400,7 @@ index 74d57be..eac278c 100644
  
  QMailStorePrivate::AttemptResult QMailStorePrivate::attemptThread(const QMailThreadId &id, QMailThread *result, ReadLock &)
  {
-@@ -8628,11 +9623,26 @@ bool QMailStorePrivate::checkPreconditions(const QMailFolder& folder, bool updat
+@@ -8628,11 +9631,26 @@ bool QMailStorePrivate::checkPreconditions(const QMailFolder& folder, bool updat
  
      if(folder.parentAccountId().isValid())
      {
@@ -1423,7 +1429,7 @@ index 74d57be..eac278c 100644
      }
  
      return true;
-@@ -9157,6 +10167,14 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
+@@ -9157,6 +10175,14 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
                                         QMailThreadIdList& modifiedThreadIds,
                                         QMailAccountIdList& modifiedAccountIds)
  {
@@ -1438,7 +1444,7 @@ index 74d57be..eac278c 100644
      {
          // Get the identifiers for all the accounts we're deleting
          QSqlQuery query(simpleQuery("SELECT t0.id FROM mailaccounts t0",
-@@ -9176,6 +10194,7 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
+@@ -9176,6 +10202,7 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
          if (noAccounts)
              return true;
      }
@@ -1446,7 +1452,7 @@ index 74d57be..eac278c 100644
  
      // We won't create new message removal records, since there will be no account to link them to
      QMailStore::MessageRemovalOption option(QMailStore::NoRemovalRecord);
-@@ -9220,7 +10239,22 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
+@@ -9220,7 +10247,22 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
          // Delete all threads contained by the account we're deleting
          if (!deleteThreads(threadKey, option, deletedThreadIds, deletedMessageIds, expiredContent, updatedMessageIds, modifiedFolderIds, modifiedThreadIds, modifiedAccountIds))
              return false;
@@ -1454,9 +1460,9 @@ index 74d57be..eac278c 100644
 +    {
 +        // Remove accounts from SSO
 +        foreach (const QMailAccountId& accountID, deletedAccountIds) {
- 
-+            QSharedPointer<Accounts::Account> ssoAccount(manager->account(accountID.toULongLong()));
 +
++            QSharedPointer<Accounts::Account> ssoAccount(manager->account(accountID.toULongLong()));
+ 
 +            if (ssoAccount) {
 +                ssoAccount->remove();
 +                if (!ssoAccount->syncAndBlock())
@@ -1469,7 +1475,7 @@ index 74d57be..eac278c 100644
      {
          // Remove any custom fields associated with these accounts
          QSqlQuery query(simpleQuery("DELETE FROM mailaccountcustom",
-@@ -9247,7 +10281,7 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
+@@ -9247,7 +10289,7 @@ bool QMailStorePrivate::deleteAccounts(const QMailAccountKey& key,
          if (query.lastError().type() != QSqlError::NoError)
              return false;
      }
@@ -1478,7 +1484,7 @@ index 74d57be..eac278c 100644
      // Do not report any deleted entities as updated
      for (QMailMessageIdList::iterator mit = updatedMessageIds.begin(); mit != updatedMessageIds.end(); ) {
          if (deletedMessageIds.contains(*mit)) {
-@@ -9606,3 +10640,133 @@ void QMailStorePrivate::emitIpcNotification(const QMailMessageIdList& ids, quint
+@@ -9606,3 +10648,133 @@ void QMailStorePrivate::emitIpcNotification(const QMailMessageIdList& ids, quint
      q_ptr->messagesUpdated(ids);
  }
  
@@ -1719,10 +1725,10 @@ index fb55efe..9cc9699 100644
  
  template <typename ValueType>
 diff --git a/src/libraries/qmfclient/qmfclient.pro b/src/libraries/qmfclient/qmfclient.pro
-index 2dbf497..7a8b6b5 100644
+index 845b986..b928f40 100644
 --- a/src/libraries/qmfclient/qmfclient.pro
 +++ b/src/libraries/qmfclient/qmfclient.pro
-@@ -14,6 +14,11 @@ win32: {
+@@ -16,6 +16,11 @@ win32: {
  }
  
  QT = core sql network
@@ -1734,7 +1740,7 @@ index 2dbf497..7a8b6b5 100644
  symbian: {
      include(../../../symbianoptions.pri)
  
-@@ -143,6 +148,10 @@ PRIVATE_HEADERS += bind_p.h \
+@@ -145,6 +150,10 @@ PRIVATE_HEADERS += bind_p.h \
                     support/qcopchannelmonitor.h \
                     support/qcopserver.h
  
@@ -1745,7 +1751,7 @@ index 2dbf497..7a8b6b5 100644
  HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
  
  
-@@ -197,6 +206,10 @@ SOURCES += longstream.cpp \
+@@ -199,6 +208,10 @@ SOURCES += longstream.cpp \
             support/qcopserver.cpp \
             support/qmailpluginmanager.cpp
  
@@ -1756,7 +1762,7 @@ index 2dbf497..7a8b6b5 100644
  win32: {
      SOURCES += locks_win32.cpp
  } else {
-@@ -232,6 +245,19 @@ symbian {
+@@ -234,6 +247,19 @@ symbian {
      }
  }
  
@@ -1945,7 +1951,7 @@ index 161150b..597619f 100644
  
  #endif
 diff --git a/src/plugins/messageservices/imap/imap.pro b/src/plugins/messageservices/imap/imap.pro
-index bb1fe34..3d8e486 100644
+index 8699cfc..452fbd1 100644
 --- a/src/plugins/messageservices/imap/imap.pro
 +++ b/src/plugins/messageservices/imap/imap.pro
 @@ -6,6 +6,16 @@ target.path += $$QMF_INSTALL_ROOT/lib/qmf/plugins/messageservices
