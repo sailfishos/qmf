@@ -170,7 +170,7 @@ HTML format.
 
 
 %prep
-%setup -q -n qt-labs-messagingframework
+%setup -q -n %{name}-%{version}
 
 # fix_tests_installation.patch
 %patch0 -p1
