@@ -1965,7 +1965,7 @@ index 8699cfc..452fbd1 100644
 +    QT += xml
 +
 +    # sso dependencies
-+    PKGCONFIG += libsignon-qt signon-plugins
++    PKGCONFIG += libsignon-qt
 +}
 +
  DEPENDPATH += .
@@ -3103,7 +3103,7 @@ index 713ac79..b8edb04 100644
 +    PKGCONFIG += accounts-qt
 +
 +    # sso dependencies
-+    PKGCONFIG += libsignon-qt signon-plugins
++    PKGCONFIG += libsignon-qt
 +}
 +
  DEPENDPATH += .
@@ -3604,7 +3604,7 @@ index 928330b..cf514a9 100644
 +    QT += xml
 +
 +    # sso dependencies
-+    PKGCONFIG += libsignon-qt signon-plugins
++    PKGCONFIG += libsignon-qt
 +}
 +
  DEPENDPATH += .
