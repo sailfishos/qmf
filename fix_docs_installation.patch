@@ -1,16 +1,23 @@
-Description: Deploy html files
-Author: Valerio Valerio <vdv100@gmail.com>
+From dc2a1e86ccca98d3324232c1db187a7bfffcea97 Mon Sep 17 00:00:00 2001
+From: Valerio Valerio <valerio.valerio@jollamobile.com>
+Date: Tue, 30 Apr 2013 14:04:02 +0300
+Subject: [PATCH] Install doc files
+
+Change-Id: I452f2eeb95f650f464864e06db44a724bec8afce
+---
+ doc/src/doc.pri |    2 ++
+ 1 file changed, 2 insertions(+)
+
 diff --git a/doc/src/doc.pri b/doc/src/doc.pri
-index 784c881..63cdb2f 100644
+index 784c881..752c46f 100644
 --- a/doc/src/doc.pri
 +++ b/doc/src/doc.pri
-@@ -44,3 +44,9 @@ OTHER_FILES = $$HELP_DEP_FILES \
+@@ -44,3 +44,5 @@ OTHER_FILES = $$HELP_DEP_FILES \
                $$_PRO_FILE_PWD_/doc/src/api/api-pages.qdoc \
                $$_PRO_FILE_PWD_/doc/src/api/classhierarchy.qdoc \
                $$_PRO_FILE_PWD_/doc/src/api/groups.qdoc
 +
-+# TEMP: deploying existing html files
-+html.files = $$_PRO_FILE_PWD_/doc/html/*
-+html.path = $$QMF_INSTALL_ROOT/share/doc/qmf/html
-+html.CONFIG += no_check_exist
-+INSTALLS += html qch_docs
++INSTALLS += qch_docs
+-- 
+1.7.9.5
+

@@ -1,3 +1,18 @@
+* Tue Apr 30 2013 Valerio Valerio <valerio.valerio@jollamobile.com> - 4.0.0
+- Update to 4.0.0.
+- Modify smtp transmitMessages action to test connection.
+- Add test description file for qt5 builds.
+- Make sure plugins are linked against correct Qt version of the qmf libs.
+- Allow parallel installation of qt4 and qt5 builds.
+- Add sync.profile.
+- Add license header for *qdoc files.
+- Update Qt 5 port to match latest release.
+- Remove Symbian support.
+- Don't try to reinvent CONFIG+=hide_symbols.
+- Change to new-form Digia license headers.
+- Update to match Digia changes on licensing texts.
+- Remove generated HTML documentation.
+
 * Wed Jan 16 2013 Valerio Valerio <valerio.valerio@jollamobile.com> - 1.0.9~2013w03
 - Update to 1.0.9~2013w03
 - Fix regression introduced by last commit.

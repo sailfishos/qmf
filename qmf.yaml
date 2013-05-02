@@ -1,6 +1,6 @@
 Name: qmf
 Summary: Qt Messaging Framework (QMF)
-Version: 1.0.9~2013w03
+Version: 4.0.0
 Release: 1
 Group: System/Libraries
 License: LGPLv2.1 with exception or GPLv3
@@ -10,7 +10,6 @@ Sources:
 Patches:
     - fix_tests_installation.patch
     - fix_docs_installation.patch
-    - no_rpath_tests_benchmarks.patch
     - accounts-qt-integration.patch
 
 Description: |
@@ -32,8 +31,6 @@ QMakeOptions:
     - DEFINES+=QMF_ENABLE_LOGGING
     - DEFINES+=USE_ACCOUNTS_QT
     - CONFIG+=syslog
-ExtraSources:
-     - qmf.sh;%{_sysconfdir}/profile.d
 NoFiles: yes
 RunFdupes:
     - "%{_includedir}"
@@ -140,16 +137,4 @@ SubPackages:
           that interacts with email and mail servers.
 
           This package contains the documentation for Qt Messaging Framework (QMF).
-      BuildArch: noarch
-
-    - Name: doc-html
-      Summary: Qt Messaging Framework (QMF) - documentation (HTML format)
-      Group: Documentation
-      Description: |
-          The Qt Messaging Framework, QMF, consists of a C++ library and daemon server
-          process that can be used to build email clients, and more generally software
-          that interacts with email and mail servers.
-
-          This package contains the documentation for Qt Messaging Framework (QMF) in
-          HTML format.
       BuildArch: noarch
