@@ -1,3 +1,7 @@
+* Wed May 15 2013 Valerio Valerio <valerio.valerio@jollamobile.com> - 4.0.0
+- Make accounts-qt support dependent in the existence of the needed packages.
+- Fix bug in the incoming authentication for accounts stored outside SSO.
+
 * Tue Apr 30 2013 Valerio Valerio <valerio.valerio@jollamobile.com> - 4.0.0
 - Update to 4.0.0.
 - Modify smtp transmitMessages action to test connection.

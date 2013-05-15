@@ -1,20 +1,21 @@
-From ac3ce16674339246261a23a8a932a59cd165996d Mon Sep 17 00:00:00 2001
+From b31b26b470a59b53ba4f7a9b2c988bbc98be1824 Mon Sep 17 00:00:00 2001
 From: Valerio Valerio <valerio.valerio@jollamobile.com>
-Date: Thu, 2 May 2013 11:11:59 +0300
+Date: Wed, 15 May 2013 16:40:34 +0300
 Subject: [PATCH] Accounts-qt integration.
 
 ---
+ common.pri                                         |   34 +
+ messagingframework.pro                             |   32 +-
  src/libraries/qmfclient/qmailaccountlistmodel.cpp  |   44 +-
  src/libraries/qmfclient/qmailstore.cpp             |    5 +-
  src/libraries/qmfclient/qmailstore_p.cpp           | 1222 +++++++++++++++++++-
  src/libraries/qmfclient/qmailstore_p.h             |   47 +-
- src/libraries/qmfclient/qmfclient.pro              |   28 +
+ src/libraries/qmfclient/qmfclient.pro              |   18 +
  src/libraries/qmfclient/share/GenericEmail.service |   65 ++
  .../qmfclient/share/GenericProvider.provider       |    5 +
  src/libraries/qmfclient/ssoaccountmanager.cpp      |   25 +
  src/libraries/qmfclient/ssoaccountmanager.h        |   35 +
  .../qmfmessageserver/qmailauthenticator.h          |    3 +
- src/plugins/messageservices/imap/imap.pro          |   17 +
  .../messageservices/imap/imapauthenticator.cpp     |   26 +
  .../messageservices/imap/imapauthenticator.h       |    4 +
  src/plugins/messageservices/imap/imapclient.cpp    |  435 ++++++-
@@ -22,7 +23,6 @@ Subject: [PATCH] Accounts-qt integration.
  src/plugins/messageservices/imap/imapprotocol.cpp  |   32 +-
  src/plugins/messageservices/imap/imapprotocol.h    |    4 +
  src/plugins/messageservices/imap/imapservice.cpp   |   90 ++
- src/plugins/messageservices/pop/pop.pro            |   16 +
  .../messageservices/pop/popauthenticator.cpp       |   27 +-
  src/plugins/messageservices/pop/popauthenticator.h |    4 +
  src/plugins/messageservices/pop/popclient.cpp      |  170 +++
@@ -31,16 +31,114 @@ Subject: [PATCH] Accounts-qt integration.
  src/plugins/messageservices/smtp/smtp.pro          |   18 +
  .../messageservices/smtp/smtpauthenticator.cpp     |   60 +-
  .../messageservices/smtp/smtpauthenticator.h       |    7 +-
- src/plugins/messageservices/smtp/smtpclient.cpp    |  208 +++-
+ src/plugins/messageservices/smtp/smtpclient.cpp    |  206 ++++
  src/plugins/messageservices/smtp/smtpclient.h      |   36 +
  src/plugins/messageservices/smtp/smtpservice.cpp   |    6 +
  tests/tst_qmailstore/tst_qmailstore.cpp            |   11 +
- 31 files changed, 2692 insertions(+), 56 deletions(-)
+ 31 files changed, 2697 insertions(+), 72 deletions(-)
  create mode 100644 src/libraries/qmfclient/share/GenericEmail.service
  create mode 100644 src/libraries/qmfclient/share/GenericProvider.provider
  create mode 100644 src/libraries/qmfclient/ssoaccountmanager.cpp
  create mode 100644 src/libraries/qmfclient/ssoaccountmanager.h
 
+diff --git a/common.pri b/common.pri
+index c690ce6..07b0916 100644
+--- a/common.pri
++++ b/common.pri
+@@ -2,6 +2,40 @@ CONFIG(debug,debug|release) {
+     DEFINES += QMF_ENABLE_LOGGING
+ }
+ 
++equals(QT_MAJOR_VERSION, 4) {
++    packagesExist(accounts-qt) {
++        packagesExist(libsignon-qt) {
++            DEFINES += USE_ACCOUNTS_QT
++            CONFIG += link_pkgconfig
++            QT += xml
++            # accounts dependencies
++            PKGCONFIG += accounts-qt
++            # sso dependencies
++            PKGCONFIG += libsignon-qt
++        } else {
++            warning("Accounts-qt support requires libsignon-qt")
++        }
++    } else {
++         warning("Accounts-qt support requires accounts-qt")
++    }
++}
++equals(QT_MAJOR_VERSION, 5) {
++    packagesExist(accounts-qt5) {
++        packagesExist(libsignon-qt5) {
++            DEFINES += USE_ACCOUNTS_QT
++            CONFIG += link_pkgconfig
++            QT += xml
++            # accounts dependencies
++            PKGCONFIG += accounts-qt5
++            # sso dependencies
++            PKGCONFIG += libsignon-qt5
++        } else {
++            warning("Accounts-qt support requires libsignon-qt5")
++        }
++    } else {
++         warning("Accounts-qt support requires accounts-qt5")
++    }
++}
+ 
+ win32 | macx {
+ 
+diff --git a/messagingframework.pro b/messagingframework.pro
+index d47d54d..005b70c 100644
+--- a/messagingframework.pro
++++ b/messagingframework.pro
+@@ -12,24 +12,22 @@ SUBDIRS = src/libraries/qmfclient \
+           tests
+ 
+ !contains(DEFINES,QMF_NO_MESSAGE_SERVICE_EDITOR) {
+-
+-SUBDIRS += \
+-          examples/qtmail/libs/qmfutil \
+-          examples/qtmail/app \
+-          examples/qtmail/plugins/viewers/generic \
+-          examples/qtmail/plugins/composers/email \
+-          examples/messagingaccounts \
+-          examples/serverobserver
+-          
+-# disable benchmark test on mac until ported
+-!macx {
+-    !SERVER_AS_DLL {
+-          SUBDIRS += benchmarks
++    SUBDIRS += \
++              examples/qtmail/libs/qmfutil \
++              examples/qtmail/app \
++              examples/qtmail/plugins/viewers/generic \
++              examples/qtmail/plugins/composers/email \
++              examples/messagingaccounts \
++              examples/serverobserver
++
++    # disable benchmark test on mac until ported
++    !macx {
++        !SERVER_AS_DLL {
++              SUBDIRS += benchmarks
++        }
+     }
+ }
+ 
+-}
+-
+ defineReplace(targetPath) {
+     return($$replace(1, /, $$QMAKE_DIR_SEP))
+ }
+@@ -41,8 +39,8 @@ dox.depends =
+ 
+ QMAKE_EXTRA_TARGETS += dox
+ 
+-include(doc/src/doc.pri)
+-
+ !unix {
+      warning("IMAP COMPRESS capability is currently not supported on non unix platforms")
+ }
++
++include(doc/src/doc.pri)
 diff --git a/src/libraries/qmfclient/qmailaccountlistmodel.cpp b/src/libraries/qmfclient/qmailaccountlistmodel.cpp
 index fa26c99..eac29fa 100644
 --- a/src/libraries/qmfclient/qmailaccountlistmodel.cpp
@@ -1787,50 +1885,17 @@ index a372583..953df5a 100644
  
  template <typename ValueType>
 diff --git a/src/libraries/qmfclient/qmfclient.pro b/src/libraries/qmfclient/qmfclient.pro
-index 39c34bb..764d77c 100644
+index 39c34bb..9cd3960 100644
 --- a/src/libraries/qmfclient/qmfclient.pro
 +++ b/src/libraries/qmfclient/qmfclient.pro
-@@ -17,6 +17,13 @@ win32: {
+@@ -184,6 +184,24 @@ unix: {
+ 	QMAKE_PKGCONFIG_DESTDIR = pkgconfig
  }
  
- QT = core sql network
-+
-+contains(DEFINES,USE_ACCOUNTS_QT) {
-+    QT += xml
-+    equals(QT_MAJOR_VERSION, 4): PKGCONFIG += accounts-qt
-+    equals(QT_MAJOR_VERSION, 5): PKGCONFIG += accounts-qt5
-+}
-+
- DEPENDPATH += .
- INCLUDEPATH += support
- 
-@@ -93,6 +100,10 @@ PRIVATE_HEADERS += bind_p.h \
-                    support/qcopchannelmonitor.h \
-                    support/qcopserver.h
- 
-+contains(DEFINES,USE_ACCOUNTS_QT) {
++packagesExist(accounts-qt) | packagesExist(accounts-qt5) {
 +    PRIVATE_HEADERS += ssoaccountmanager.h
-+}
-+
- HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
- 
- 
-@@ -147,6 +158,10 @@ SOURCES += longstream.cpp \
-            support/qcopserver.cpp \
-            support/qmailpluginmanager.cpp
- 
-+contains(DEFINES,USE_ACCOUNTS_QT) {
 +    SOURCES += ssoaccountmanager.cpp
-+}
 +
- win32: {
-     SOURCES += locks_win32.cpp
- } else {
-@@ -177,6 +192,19 @@ header_files.files=$$PUBLIC_HEADERS
- 
- INSTALLS += header_files
- 
-+contains(DEFINES,USE_ACCOUNTS_QT) {
 +    # THIS NEEDS TO BE CHECKED
 +    # Install generic SSO provider description
 +    sso_providers.files = share/GenericProvider.provider
@@ -1841,11 +1906,13 @@ index 39c34bb..764d77c 100644
 +    sso_services.path  = $$QMF_INSTALL_ROOT/share/accounts/services
 +
 +    INSTALLS += sso_providers sso_services
++} else {
++     warning("Accounts-qt support requires accounts-qt")
 +}
 +
- unix: {
- 	CONFIG += create_pc create_prl
- 	QMAKE_PKGCONFIG_LIBDIR  = $$target.path
+ packagesExist(icu-uc) {
+     LIBS += -licui18n -licuuc -licudata
+     PRIVATE_HEADERS += support/qcharsetdetector_p.h \
 diff --git a/src/libraries/qmfclient/share/GenericEmail.service b/src/libraries/qmfclient/share/GenericEmail.service
 new file mode 100644
 index 0000000..9da41a6
@@ -2014,36 +2081,8 @@ index d282f47..d7ddf13 100644
  };
  
  #endif
-diff --git a/src/plugins/messageservices/imap/imap.pro b/src/plugins/messageservices/imap/imap.pro
-index 7aca1b2..0f986db 100644
---- a/src/plugins/messageservices/imap/imap.pro
-+++ b/src/plugins/messageservices/imap/imap.pro
-@@ -17,6 +17,23 @@ contains(DEFINES,QT_QMF_USE_ALIGNEDTIMER) {
-     QT += alignedtimer
- }
- 
-+contains(DEFINES,USE_ACCOUNTS_QT) {
-+    CONFIG += link_pkgconfig
-+    QT += xml
-+    equals(QT_MAJOR_VERSION, 4) {
-+        # accounts dependencies
-+        PKGCONFIG += accounts-qt
-+        # sso dependencies
-+        PKGCONFIG += libsignon-qt
-+    }
-+    equals(QT_MAJOR_VERSION, 5) {
-+        # accounts dependencies
-+        PKGCONFIG += accounts-qt5
-+        # sso dependencies
-+        PKGCONFIG += libsignon-qt5
-+    }
-+}
-+
- DEPENDPATH += .
- 
- INCLUDEPATH += . ../../../libraries/qmfclient \
 diff --git a/src/plugins/messageservices/imap/imapauthenticator.cpp b/src/plugins/messageservices/imap/imapauthenticator.cpp
-index 9054b6a..8a0fedc 100644
+index 9054b6a..4484ac2 100644
 --- a/src/plugins/messageservices/imap/imapauthenticator.cpp
 +++ b/src/plugins/messageservices/imap/imapauthenticator.cpp
 @@ -47,6 +47,7 @@
@@ -2111,7 +2150,7 @@ index a7e48b9..a6554d6 100644
  };
  
 diff --git a/src/plugins/messageservices/imap/imapclient.cpp b/src/plugins/messageservices/imap/imapclient.cpp
-index 59d170a..7a9f5d7 100644
+index 59d170a..e8baeec 100644
 --- a/src/plugins/messageservices/imap/imapclient.cpp
 +++ b/src/plugins/messageservices/imap/imapclient.cpp
 @@ -53,6 +53,10 @@
@@ -2418,7 +2457,7 @@ index 59d170a..7a9f5d7 100644
              case IMAP_Login:
              {
 +#ifdef USE_ACCOUNTS_QT
-+                if (!loginFailed) {
++                if (!loginFailed && _session) {
 +                    loginFailed = true;
 +                    _sendLogin = true;
 +                    ssoProcessLogin();
@@ -3160,35 +3199,8 @@ index 4c37083..2688bc8 100644
  }
  
  QString ImapService::service() const
-diff --git a/src/plugins/messageservices/pop/pop.pro b/src/plugins/messageservices/pop/pop.pro
-index 23e21a3..214f0b4 100644
---- a/src/plugins/messageservices/pop/pop.pro
-+++ b/src/plugins/messageservices/pop/pop.pro
-@@ -13,6 +13,22 @@ equals(QT_MAJOR_VERSION, 5) {
- 
- QT = core network
- 
-+contains(DEFINES,USE_ACCOUNTS_QT) {
-+    CONFIG += link_pkgconfig
-+    equals(QT_MAJOR_VERSION, 4) {
-+        # accounts dependencies
-+        PKGCONFIG += accounts-qt
-+        # sso dependencies
-+        PKGCONFIG += libsignon-qt
-+    }
-+    equals(QT_MAJOR_VERSION, 5) {
-+        # accounts dependencies
-+        PKGCONFIG += accounts-qt5
-+        # sso dependencies
-+        PKGCONFIG += libsignon-qt5
-+    }
-+}
-+
- DEPENDPATH += .
- 
- INCLUDEPATH += . ../../../libraries/qmfclient \
 diff --git a/src/plugins/messageservices/pop/popauthenticator.cpp b/src/plugins/messageservices/pop/popauthenticator.cpp
-index 23f0206..a5d71f7 100644
+index 23f0206..50e23b2 100644
 --- a/src/plugins/messageservices/pop/popauthenticator.cpp
 +++ b/src/plugins/messageservices/pop/popauthenticator.cpp
 @@ -45,7 +45,7 @@
@@ -3256,7 +3268,7 @@ index 1dc2e6e..1b52b8c 100644
  };
  
 diff --git a/src/plugins/messageservices/pop/popclient.cpp b/src/plugins/messageservices/pop/popclient.cpp
-index 2643c52..c38d7fb 100644
+index 2643c52..d3359ab 100644
 --- a/src/plugins/messageservices/pop/popclient.cpp
 +++ b/src/plugins/messageservices/pop/popclient.cpp
 @@ -55,6 +55,10 @@
@@ -3444,7 +3456,7 @@ index 2643c52..c38d7fb 100644
          if (response[0] != '+') {
              // Authentication failed
 +#ifdef USE_ACCOUNTS_QT
-+            if (!_authFailed) {
++            if (!_authFailed && _session) {
 +                _authFailed = true;
 +                ssoProcessLogin();
 +            }
@@ -3696,7 +3708,7 @@ index aacaffc..ec6a48f 100644
  
  INCLUDEPATH += . ../../../libraries/qmfclient \
 diff --git a/src/plugins/messageservices/smtp/smtpauthenticator.cpp b/src/plugins/messageservices/smtp/smtpauthenticator.cpp
-index 252684a..6c4f5c8 100644
+index 252684a..3b1a931 100644
 --- a/src/plugins/messageservices/smtp/smtpauthenticator.cpp
 +++ b/src/plugins/messageservices/smtp/smtpauthenticator.cpp
 @@ -44,7 +44,7 @@
@@ -3804,7 +3816,7 @@ index 8202437..cc56d33 100644
  
  #endif
 diff --git a/src/plugins/messageservices/smtp/smtpclient.cpp b/src/plugins/messageservices/smtp/smtpclient.cpp
-index 1c38e00..9fdd790 100644
+index 1c38e00..2cc7af9 100644
 --- a/src/plugins/messageservices/smtp/smtpclient.cpp
 +++ b/src/plugins/messageservices/smtp/smtpclient.cpp
 @@ -60,6 +60,10 @@
@@ -4030,8 +4042,7 @@ index 1c38e00..9fdd790 100644
      {
          if (responseCode == 334) {
              // This is a continuation containing a challenge string (in Base64)
--            QByteArray challenge = QByteArray::fromBase64(response.mid(4).toLatin1());
-+            QByteArray challenge = QByteArray::fromBase64(response.mid(4).toLatin1());
+             QByteArray challenge = QByteArray::fromBase64(response.mid(4).toLatin1());
 +#ifdef USE_ACCOUNTS_QT
 +            QByteArray response(SmtpAuthenticator::getResponse(config.serviceConfiguration("smtp"), challenge, password));
 +#else

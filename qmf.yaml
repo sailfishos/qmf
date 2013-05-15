@@ -29,7 +29,6 @@ Builder: qmake
 QMakeOptions:
     - "QMF_INSTALL_ROOT=%{_prefix}"
     - DEFINES+=QMF_ENABLE_LOGGING
-    - DEFINES+=USE_ACCOUNTS_QT
     - CONFIG+=syslog
 NoFiles: yes
 RunFdupes:
