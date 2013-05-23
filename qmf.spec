@@ -211,6 +211,7 @@ rm -rf %{buildroot}
 %{_includedir}/qmfclient/qmail*.h
 %{_includedir}/qmfclient/qprivateimplementation.h
 %{_includedir}/qmfclient/qprivateimplementationdef.h
+%{_includedir}/qmfclient/sso*.h
 %{_libdir}/libqmfmessageserver.prl
 %{_libdir}/libqmfmessageserver.so
 %{_libdir}/libqmfutil.so
@@ -242,6 +243,7 @@ rm -rf %{buildroot}
 # >> files libqmfclient1
 %{_libdir}/libqmfclient.so.*
 %{_libdir}/qmf/plugins/contentmanagers/libqmfstoragemanager.so
+%{_libdir}/qmf/plugins/ssoauth/libpasswordplugin.so
 %{_datadir}/accounts/*
 # << files libqmfclient1
 
