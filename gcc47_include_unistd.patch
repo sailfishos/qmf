@@ -1,0 +1,10 @@
+--- a/src/tools/messageserver/messageserver.cpp	2013-04-30 11:44:28.000000000 +0200
++++ b/src/tools/messageserver/messageserver.cpp	2013-09-22 01:47:09.648947285 +0200
+@@ -55,6 +55,7 @@
+ extern "C" {
+ #ifndef Q_OS_WIN
+ #include <sys/socket.h>
++#include <unistd.h>
+ #endif
+ #include <signal.h>
+ }

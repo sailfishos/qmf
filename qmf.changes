@@ -1,3 +1,7 @@
+* Sun Sep 22 2013 Davide Bettio <davide.bettio@ispirata.com> - 1.26.0.1
+- Added a patch to include unistd.h where needed:
+  since gcc 4.7 libstdc++ doesn't include anymore unistd.h.
+
 * Thu May 23 2013 Valerio Valerio <valerio.valerio@jollamobile.com> - 4.0.0
 - Add support for accounts-sso authentication plugins.
 - Add authentication plugin for password mechanism.

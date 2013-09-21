@@ -11,6 +11,7 @@ Patches:
     - fix_tests_installation.patch
     - fix_docs_installation.patch
     - accounts-qt-integration.patch
+    - gcc47_include_unistd.patch
 
 Description: |
     The Qt Messaging Framework, QMF, consists of a C++ library and daemon server

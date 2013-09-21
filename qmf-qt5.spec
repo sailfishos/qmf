@@ -10,6 +10,7 @@ Source0:    %{_name}-%{version}.tar.bz2
 Patch0:     fix_tests_installation.patch
 Patch1:     fix_docs_installation.patch
 Patch2:     accounts-qt-integration.patch
+Patch3:     gcc47_include_unistd.patch
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(Qt5Core)
@@ -160,6 +161,8 @@ This package contains the documentation for Qt Messaging Framework (QMF).
 %patch1 -p1
 # accounts-qt-integration.patch
 %patch2 -p1
+# gcc47_include_unistd.patch
+%patch3 -p1
 # >> setup
 # << setup
 
