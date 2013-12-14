@@ -1,3 +1,6 @@
+* Sat Dec 14 2013 Carsten Munk <carsten.munk@jollamobile.com> - 4.0.0
+- Force -fno-inline-small-functions in order to build on GCC 4.8
+
 * Sun Sep 22 2013 Davide Bettio <davide.bettio@ispirata.com> - 1.26.0.1
 - Added a patch to include unistd.h where needed:
   since gcc 4.7 libstdc++ doesn't include anymore unistd.h.

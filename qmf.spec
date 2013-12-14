@@ -20,6 +20,7 @@ Patch0:     fix_tests_installation.patch
 Patch1:     fix_docs_installation.patch
 Patch2:     accounts-qt-integration.patch
 Patch3:     gcc47_include_unistd.patch
+Patch4:     gcc48_elf_visibility.patch
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(QtGui)
@@ -165,11 +166,16 @@ This package contains the documentation for Qt Messaging Framework (QMF).
 %patch2 -p1
 # gcc47_include_unistd.patch
 %patch3 -p1
+
+%patch4 -p1
+
 # >> setup
 # << setup
 
 %build
 # >> build pre
+export CXXFLAGS="$CXXFLAGS -fno-inline-small-functions"
+export CFLAGS="$CFLAGS -fno-inline-small-functions"
 # << build pre
 
 %qmake  \

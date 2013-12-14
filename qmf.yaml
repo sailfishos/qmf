@@ -12,7 +12,7 @@ Patches:
     - fix_docs_installation.patch
     - accounts-qt-integration.patch
     - gcc47_include_unistd.patch
-
+    - gcc48_elf_visibility.patch
 Description: |
     The Qt Messaging Framework, QMF, consists of a C++ library and daemon server
     process that can be used to build email clients, and more generally software
